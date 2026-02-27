@@ -1,0 +1,673 @@
+
+
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>she</title> <!-- handwritten fonts & pastel --> <link rel="preconnect" href="https://fonts.
+
+pasted
+
+could you make it for both desktop and mobile screens
+
+3:17 AM
+
+Reading frontend design skill
+Reading frontend design skill
+Now I'll create the responsive version optimized for both desktop and mobile:
+
+
+Created a file, read a file
+Created a file, read a file
+here's the responsive version! here's what changed for mobile vs desktop:
+
+on mobile (≤700px):
+
+the 4-column grid collapses into a single clean vertical column — all nodes stack in reading order
+floating rants & doodles (which would overlap everything) are hidden, replaced by a horizontal scroll strip of key quotes at the top — swipe to read them all
+font sizes, padding, and card shapes all scale fluidly with clamp()
+corner doodles are simplified to a bottom row of emoji icons that don't overlap content
+arrow cells are hidden (they made no sense vertically)
+on desktop (≥1000px):
+
+all the original chaos is preserved — floating rants on both sides, crossed-out notes, doodle icons, the asymmetric grid with arrows going diagonal
+everything else (music bar, final note, playlist) is fully responsive at any screen size.
+
+Index
+Code · HTML 
+
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+Index · HTML
+Copy
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>she</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Gaegu:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --pink: #fbb0c0;
+            --deep-pink: #ff88aa;
+            --bg: #ffe8f0;
+            --card-bg: #fffcf0;
+            --shadow: #e5a0b0;
+            --text: #3b2b2b;
+            --accent: #a06b7a;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: 'Gaegu', 'Caveat', cursive;
+            color: var(--text);
+            padding: 20px 16px 40px;
+            min-height: 100vh;
+            line-height: 1.4;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            text-transform: lowercase;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .page-header h1 {
+            font-family: 'Caveat', cursive;
+            font-size: clamp(1.6rem, 5vw, 2.4rem);
+            color: var(--accent);
+            text-decoration: underline wavy var(--deep-pink) 2px;
+            text-underline-offset: 6px;
+        }
+
+        /* ── MAIN WRAPPER ── */
+        .roadmap-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background-color: rgba(255, 245, 240, 0.55);
+            border-radius: 40px 16px 40px 16px;
+            padding: clamp(16px, 3vw, 30px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        /* ── NODE GRID ── */
+        /* Desktop: 4-col asymmetric with col 2 as the main spine */
+        .node-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 20px 14px;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Mobile: single column, all nodes stack */
+        @media (max-width: 700px) {
+            .node-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+            /* Reset all explicit placements on mobile */
+            .node-grid > * {
+                grid-column: 1 !important;
+                grid-row: unset !important;
+            }
+            /* Re-hide arrow cells that make no sense in vertical flow */
+            .arrow-cell {
+                display: none;
+            }
+            /* Show simple dividers instead */
+            .node + .node::before {
+                content: "⬇️";
+                display: block;
+                text-align: center;
+                font-size: 1.5rem;
+                margin-bottom: -4px;
+            }
+        }
+
+        /* ── NODE CARD ── */
+        .node {
+            background: var(--card-bg);
+            border: 3px solid var(--pink);
+            border-radius: 28px 10px 28px 10px;
+            padding: clamp(14px, 2vw, 18px) clamp(12px, 2vw, 14px);
+            box-shadow: 7px 7px 0 var(--shadow), 0 2px 10px rgba(0,0,0,0.04);
+            font-family: 'Caveat', 'Gaegu', cursive;
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            transform: rotate(var(--rot, -0.5deg));
+            word-break: break-word;
+        }
+        .node:nth-child(odd)  { --rot:  1deg; }
+        .node:nth-child(3n)   { --rot: -1.2deg; }
+        .node:nth-child(5n)   { --rot:  1.8deg; background: #fff5ea; }
+        .node:nth-child(7n)   { --rot: -0.3deg; background: #f5f0ff; border-color: #c0b0e0; }
+
+        .node strong {
+            font-size: clamp(1.1rem, 3vw, 1.45rem);
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+            text-decoration: underline wavy #ff88a0 2px;
+            text-underline-offset: 6px;
+        }
+        .node ul { list-style: none; padding-left: 4px; }
+        .node li {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            font-size: clamp(0.95rem, 2.2vw, 1.18rem);
+        }
+        .node li::before {
+            content: "✦";
+            color: #ff99aa;
+            flex-shrink: 0;
+        }
+
+        /* ── ARROWS ── */
+        .arrow-cell {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            text-align: center;
+            align-self: center;
+            justify-self: center;
+            filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.08));
+            transform: rotate(var(--a-rot, 0deg));
+            opacity: 0.8;
+            z-index: 10;
+        }
+
+        /* ── FLOATING RANTS ── */
+        /* Hidden on mobile (they'd overlap content) */
+        .floating-rant, .crossed-note, .doodle-icon, .corner-doodle {
+            display: none;
+        }
+        @media (min-width: 1000px) {
+            .floating-rant {
+                display: block;
+                position: absolute;
+                background: #fff0d4;
+                border: 2px dashed #ff9eb5;
+                border-radius: 28px 10px 28px 10px;
+                padding: 10px 16px;
+                font-size: clamp(1rem, 1.1vw, 1.3rem);
+                font-weight: 500;
+                box-shadow: 4px 4px 0 #eec0d0;
+                max-width: 240px;
+                z-index: 40;
+                transform: rotate(var(--rant-rot, -2deg));
+                line-height: 1.3;
+                pointer-events: none;
+            }
+            .crossed-note {
+                display: block;
+                position: absolute;
+                font-size: 1.6rem;
+                text-decoration: line-through wavy #ff4d6d 3px;
+                color: #a06b7a;
+                font-weight: 700;
+                transform: rotate(-6deg) scale(1.05);
+                white-space: nowrap;
+                text-shadow: 2px 2px 0 #ffb6c1;
+                z-index: 50;
+                opacity: 0.9;
+                pointer-events: none;
+            }
+            .doodle-icon, .corner-doodle {
+                display: block;
+                position: absolute;
+                font-size: 2.5rem;
+                z-index: 45;
+                transform: rotate(var(--d-rot, 0deg));
+                pointer-events: none;
+            }
+        }
+
+        /* ── MOBILE QUOTE STRIP ── */
+        /* On mobile show a scrollable strip of key quotes */
+        .mobile-quotes {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 10px 4px 14px;
+            margin: 0 -4px 18px;
+            scrollbar-width: none;
+        }
+        .mobile-quotes::-webkit-scrollbar { display: none; }
+        .mobile-quotes .quote-chip {
+            flex-shrink: 0;
+            background: #fff0d4;
+            border: 2px dashed #ff9eb5;
+            border-radius: 30px;
+            padding: 7px 14px;
+            font-size: 0.95rem;
+            font-family: 'Caveat', cursive;
+            white-space: nowrap;
+            box-shadow: 3px 3px 0 #eec0d0;
+        }
+        @media (min-width: 1000px) {
+            .mobile-quotes { display: none; }
+        }
+
+        /* ── FINAL NOTE ── */
+        .final-note-wrap {
+            text-align: center;
+            margin: 50px 0 36px;
+        }
+        .final-note {
+            display: inline-block;
+            font-size: clamp(1.1rem, 3vw, 1.9rem);
+            background: #ffe0f0;
+            padding: clamp(14px, 2vw, 20px) clamp(20px, 4vw, 40px);
+            border-radius: 80px 16px 80px 16px;
+            border: 4px dotted #ff88aa;
+            transform: rotate(-1deg);
+            box-shadow: 8px 8px 0 #dbb0c0;
+            font-weight: 600;
+            max-width: 90vw;
+        }
+
+        /* ── MUSIC BAR ── */
+        .music-bar {
+            background: #fff0e0;
+            border: 3px solid #ffb3c6;
+            border-radius: 36px 10px 36px 10px;
+            padding: clamp(14px, 3vw, 20px);
+            max-width: min(550px, 96vw);
+            margin: 0 auto 24px;
+            box-shadow: 7px 7px 0 var(--shadow);
+            transform: rotate(0.5deg);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            font-family: 'Caveat', cursive;
+            position: relative;
+            z-index: 60;
+        }
+        .music-bar .label {
+            font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            text-decoration: underline wavy var(--deep-pink) 2px;
+            text-underline-offset: 6px;
+        }
+        .playlist { list-style: none; }
+        .playlist li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: #fff9f0;
+            border-radius: 36px 10px 36px 10px;
+            margin-bottom: 8px;
+            border: 2px solid #fec5d0;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .playlist li:hover, .playlist li:active {
+            background: #ffe4e9;
+            border-color: #ff88aa;
+            transform: scale(1.01) rotate(-0.2deg);
+        }
+        .playlist li .play-icon {
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            width: 28px;
+            text-align: center;
+            color: #ff88aa;
+            flex-shrink: 0;
+        }
+        .playlist li .song-name { flex: 1; word-break: break-word; }
+        .playlist li.playing {
+            background: #ffe0e8;
+            border: 3px solid #ff6b9d;
+            box-shadow: 0 0 8px #ffb3c6;
+        }
+        audio {
+            width: 100%;
+            border-radius: 30px;
+            margin-top: 6px;
+        }
+        .footer-tagline {
+            text-align: center;
+            margin-top: 26px;
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+<div class="roadmap-container" style="position: relative;">
+
+    <!-- Mobile-only scrollable quote strip -->
+    <div class="mobile-quotes">
+        <div class="quote-chip">💗 "ab mai sach m koi contact m nhi rhna chahti"</div>
+        <div class="quote-chip">😩 "i just don't want to cry over you anymore"</div>
+        <div class="quote-chip">🤷 "kyunki tumhare pass honge log"</div>
+        <div class="quote-chip">⚠️ "mere pass koi nhi h chup karane ke liye"</div>
+        <div class="quote-chip">💔 "tumhe andaza nhi h how badly i am hurt"</div>
+        <div class="quote-chip">🆘 "i am not even telling this is so true"</div>
+        <div class="quote-chip">💡 "tum osm ho par tum awesome nhi ho"</div>
+        <div class="quote-chip">🚪 "mai expect karne lagti hu"</div>
+        <div class="quote-chip">🥺 "tum pagal ho"</div>
+    </div>
+
+    <!-- main node grid -->
+    <div class="node-grid">
+
+        <div class="node" style="grid-column: 2; grid-row: 1;">
+            <strong>start here</strong>
+            <ul>
+                <li>met her online 💫</li>
+                <li>she was sure</li>
+                <li>now I overthink her 🥶</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 2;">⬇️✨</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 3;">
+            <strong>ab mai sach m koi contact m nhi rhna chahti</strong>
+            <ul>
+                <li>but she still texts</li>
+                <li>sometimes online, sometimes ghost 👻</li>
+                <li>"i just don't want to cry over you anymore"</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 4;">⬇️🌀</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 5;">
+            <strong>kyunki tumhare pass honge log</strong>
+            <ul>
+                <li>mere pass koi nhi h chup karane ke liye</li>
+                <li>logo ko dhoondhna padta h ki kiske samne rou</li>
+                <li>"us din mujhe itna bura laga"</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 3; grid-row: 6; --a-rot: 35deg;">➡️💔</div>
+
+        <div class="node" style="grid-column: 4; grid-row: 6;">
+            <strong>tum osm ho</strong>
+            <ul>
+                <li>par tum awesome nhi ho</li>
+                <li>tum pagal ho</li>
+                <li>baat Mt Kiya kro</li>
+                <li>mujhe hopes rhti h</li>
+                <li>mai expect karne lagti hu</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 3; grid-row: 7; --a-rot: -40deg;">↙️😩</div>
+
+        <div class="node" style="grid-column: 1; grid-row: 8;">
+            <strong>ha ha baba mujhe sb pta hai</strong>
+            <ul>
+                <li>mai tumhara khyaal rkh skta hu</li>
+                <li>single life kitni sahi hoti h</li>
+                <li>kis line m aa gyi hu mai</li>
+                <li>you: mai tumhara khyaal rkh skta hu</li>
+                <li>ek i love you to bola ni jata</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 9; --a-rot: -20deg;">↘️💘</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 10;">
+            <strong>friendzoned karke rkha meko</strong>
+            <ul>
+                <li>vaise bhi marne ka man h</li>
+                <li>you: ha milna phir</li>
+                <li>baatein aati h</li>
+                <li>aur mujhe time pass bana rkha h</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 11;">⬇️💬</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 12;">
+            <strong>commitment to karni nhi h</strong>
+            <ul>
+                <li>aur chahiye bhi ki mai jau na</li>
+                <li>tumse ishq nhi hota to karna jaroori nhi</li>
+                <li>kisi ko beech raah m chhodna majboori nhi</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 13;">⬇️🔐</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 14;">
+            <strong>khelne ke liye khilone hote hain</strong>
+            <ul>
+                <li>kisi ke maasoom dil ko toda nhi karte</li>
+                <li>pyar kisi ek shakhs se hota hai</li>
+                <li>har kisi se thoda thoda nhi karte</li>
+                <li>khair</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 15;">⬇️☕️</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 16;">
+            <strong>i still remember</strong>
+            <ul>
+                <li>her "tum osm ho"</li>
+                <li>her "ab mai sach m koi contact m nhi rhna chahti"</li>
+                <li>and then she texts again</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 17;">⬇️🌐</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 18;">
+            <strong>i try to handle</strong>
+            <ul>
+                <li>she says she's done</li>
+                <li>she calls me pagal</li>
+                <li>me: constantly confused</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 19;">⬇️🧪</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 20;">
+            <strong>tests i face</strong>
+            <ul>
+                <li>"i can't do this please ab nhi"</li>
+                <li>then "ha milna phir"</li>
+                <li>"tumhe andaza nhi h how badly i am hurt"</li>
+                <li>"i am not even telling this is so true"</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 21;">⬇️🔄</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 22;">
+            <strong>our routine</strong>
+            <ul>
+                <li>she goes to college</li>
+                <li>she comes back tired</li>
+                <li>sometimes we talk, sometimes we don't</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 23;">⬇️🐳</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 24;">
+            <strong>holding it together</strong>
+            <ul>
+                <li>i try to believe "mai tumhara khyaal rkh skta hu"</li>
+                <li>but she says "single life kitni sahi hoti h"</li>
+                <li>us, but fragile</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 25;">⬇️📬</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 26;">
+            <strong>her solo drama</strong>
+            <ul>
+                <li>"kyunki tumhare pass honge log"</li>
+                <li>"mere pass koi nhi h"</li>
+                <li>she cries alone</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 27;">⬇️📊</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 28;">
+            <strong>checking on her</strong>
+            <ul>
+                <li>how many times she said "i can't do this"</li>
+                <li>i count her "khair"s</li>
+                <li>alert: "please" 🚨</li>
+            </ul>
+        </div>
+
+        <div class="arrow-cell" style="grid-column: 2; grid-row: 29;">⬇️☁️</div>
+
+        <div class="node" style="grid-column: 2; grid-row: 30;">
+            <strong>she's in my head</strong>
+            <ul>
+                <li>i can't escape her texts</li>
+                <li>those words: "I Love You"</li>
+                <li>i google "how to make her stay"</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ── FLOATING RANTS (desktop only, via CSS) ── -->
+    <div class="floating-rant" style="top: 8%; left: 1%; --rant-rot: -4deg;">💗 "ab mai sach m koi contact m nhi rhna chahti"</div>
+    <div class="floating-rant" style="top: 22%; left: 2%; --rant-rot: 2deg; background: #e6f7f0;">😩 "i just don't want to cry over you anymore"</div>
+    <div class="floating-rant" style="top: 40%; left: 3%; --rant-rot: -3deg;">🤷‍♀️ "kyunki tumhare pass honge log"</div>
+    <div class="floating-rant" style="top: 55%; left: 1%; background: #feeac9;">⚠️ "mere pass koi nhi h chup karane ke liye"</div>
+    <div class="floating-rant" style="top: 70%; left: 2%;">📅 "us din mujhe itna bura laga"</div>
+    <div class="floating-rant" style="top: 85%; left: 3%; background: #f0e2ff;">❓ "tumhe andaza nhi h how badly i am hurt"</div>
+
+    <div class="floating-rant" style="top: 5%; right: 1%; background: #ffd9e8;">🆘 "i am not even telling this is so true"</div>
+    <div class="floating-rant" style="top: 18%; right: 2%;">💡 "tum osm ho par tum awesome nhi ho"</div>
+    <div class="floating-rant" style="top: 32%; right: 3%; background: #ffe0b0;">📈 "mujhe hopes rhti h"</div>
+    <div class="floating-rant" style="top: 48%; right: 1%;">🚪 "mai expect karne lagti hu"</div>
+    <div class="floating-rant" style="top: 62%; right: 2%; background: #f0e2ff;">💬 "baat Mt Kiya kro"</div>
+    <div class="floating-rant" style="top: 78%; right: 3%;">🥺 "tum pagal ho"</div>
+
+    <!-- crossed-out notes -->
+    <div class="crossed-note" style="top: 12%; left: 60%;">~~tumse ishq nhi hota~~</div>
+    <div class="crossed-note" style="top: 45%; left: 70%;">~~khelne ke liye khilone hote hain~~</div>
+    <div class="crossed-note" style="bottom: 25%; left: 65%;">~~kisi ke maasoom dil ko toda nhi karte~~</div>
+
+    <!-- doodles -->
+    <div class="doodle-icon" style="top: 10%; left: 80%; --d-rot: -10deg;">💔⚡️</div>
+    <div class="doodle-icon" style="top: 28%; left: 85%; --d-rot: 5deg;">⚠️🚨</div>
+    <div class="doodle-icon" style="top: 3%; left: 15%; --d-rot: 180deg;">↩️🔄🌀</div>
+    <div class="doodle-icon" style="top: 35%; left: 90%;">❓❓❓</div>
+    <div class="doodle-icon" style="top: 68%; left: 88%;">👻💬</div>
+    <div class="doodle-icon" style="top: 52%; left: 12%; --d-rot: 15deg;">🩹🤕</div>
+    <div class="doodle-icon" style="top: 75%; left: 10%;">☕️😵‍💫</div>
+    <div class="doodle-icon" style="bottom: 15%; left: 18%; font-size: 2.5rem; opacity:0.4;">〰️🤪</div>
+    <div class="corner-doodle" style="bottom: 10%; left: 50%; font-size: 3rem; transform: translateX(-50%) rotate(-10deg); color: #b38090;">↪️💘</div>
+
+    <!-- final note -->
+    <div class="final-note-wrap">
+        <div class="final-note">
+            "i don't get her. but i still wait for her text."
+        </div>
+    </div>
+
+    <!-- ── MUSIC PLAYLIST ── -->
+    <div class="music-bar">
+        <div class="label">
+            <i class="fas fa-headphones-alt" style="color: #ff88aa;"></i>
+        </div>
+
+        <ul class="playlist" id="playlist"></ul>
+
+        <audio id="audio-player" controls>
+            <source src="" type="audio/mpeg">
+            your browser doesn't support audio.
+        </audio>
+
+        <div style="font-size: clamp(0.9rem, 2vw, 1rem); color: #b38090; text-align: center;">
+            ⚡ it's Awesome !
+        </div>
+    </div>
+
+    <!-- corner doodles (desktop shown via .corner-doodle class above) -->
+    <!-- mobile-friendly inline doodles at bottom -->
+    <div style="display:flex; justify-content: space-between; padding: 10px 4px 0; font-size: 1.6rem;">
+        <span>💭💔💭</span>
+        <span>❓💢❓</span>
+        <span>✖️💢✖️</span>
+    </div>
+</div>
+
+<div class="footer-tagline">
+    🥀 from yours, always 🥀
+</div>
+
+<script>
+    const songs = [
+        { name: "her fav.", src: "her.mp3"   },
+    ];
+
+    const playlistEl  = document.getElementById('playlist');
+    const audioPlayer = document.getElementById('audio-player');
+    let currentIndex  = -1;
+
+    function renderPlaylist() {
+        playlistEl.innerHTML = '';
+        songs.forEach((song, index) => {
+            const li = document.createElement('li');
+            li.setAttribute('data-index', index);
+            li.innerHTML = `
+                <span class="play-icon">${index === currentIndex ? '⏸️' : '▶️'}</span>
+                <span class="song-name">${song.name}</span>
+            `;
+            li.addEventListener('click', () => playSong(index));
+            playlistEl.appendChild(li);
+        });
+    }
+
+    function playSong(index) {
+        if (index === currentIndex && !audioPlayer.paused) {
+            audioPlayer.pause();
+        } else {
+            audioPlayer.src = songs[index].src;
+            audioPlayer.load();
+            audioPlayer.play().catch(e => console.log('playback failed:', e));
+            currentIndex = index;
+        }
+        updatePlaylistUI();
+    }
+
+    function updatePlaylistUI() {
+        playlistEl.querySelectorAll('li').forEach((item, idx) => {
+            const icon = item.querySelector('.play-icon');
+            const isPlaying = idx === currentIndex && !audioPlayer.paused;
+            icon.textContent = isPlaying ? '⏸️' : '▶️';
+            item.classList.toggle('playing', isPlaying);
+        });
+    }
+
+    audioPlayer.addEventListener('play',  updatePlaylistUI);
+    audioPlayer.addEventListener('pause', updatePlaylistUI);
+    audioPlayer.addEventListener('ended', () => { currentIndex = -1; updatePlaylistUI(); });
+
+    renderPlaylist();
+</script>
+</body>
+</html>
